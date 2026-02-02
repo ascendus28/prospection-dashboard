@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Prospection — Saint-Médard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #050505;
+            --bg-card: #0a0a0a;
+            --bg-elevated: #111111;
+            --border: #1a1a1a;
+            --border-subtle: #151515;
+            --text-primary: #fafafa;
+            --text-secondary: #737373;
+            --text-muted: #525252;
+            --accent: #22c55e;
+            --accent-dim: rgba(34, 197, 94, 0.15);
+            --orange: #f97316;
+            --blue: #3b82f6;
+            --purple: #a855f7;
+            --yellow: #eab308;
+            --red: #ef4444;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg-base);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            padding-bottom: 100px;
+        }
+
+        /* Header */
+        .header {
+            position: sticky;
+            top: 0;
+            background: var(--bg-base);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem;
+            z-index: 100;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+
+        h1 { font-size: 1.125rem; font-weight: 600; }
+        .subtitle { font-size: 0.75rem; color: var(--text-muted); }
+
+        /* Stats Bar */
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.5rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 0.5rem;
+            background: var(--bg-card);
+            border-radius: 8px;
+        }
+
+        .stat-value { font-size: 1.25rem; font-weight: 600; color: var(--accent); }
+        .stat-label { font-size: 0.625rem; color: var(--text-muted); text-transform: uppercase; }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .tab {
+            flex: 1;
+            padding: 1rem;
+            text-align: center;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .tab.active {
+            color: var(--accent);
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--accent);
+        }
+
+        .tab-icon { margin-right: 0.5rem; }
+
+        /* Tab Content */
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* Filters */
+        .filters {
+            padding: 0.75rem 1rem;
+            display: flex;
+            gap: 0.5rem;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .filter-btn {
+            flex-shrink: 0;
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border);
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            border-radius: 20px;
+            font-size: 0.8125rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-btn.active {
+            background: var(--accent-dim);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .filter-btn .count { margin-left: 0.25rem; opacity: 0.7; }
+
+        /* Search */
+        .search-bar { padding: 0.75rem 1rem; }
+
+        .search-input {
+            width: 100%;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            color: var(--text-primary);
+            font-size: 0.9375rem;
+        }
+
+        .search-input:focus { outline: none; border-color: var(--accent); }
+        .search-input::placeholder { color: var(--text-muted); }
+
+        /* Business List */
+        .business-list { padding: 0.5rem; }
+
+        .business-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            margin-bottom: 0.5rem;
+            overflow: hidden;
+        }
+
+        .business-card.contacted { border-left: 3px solid var(--accent); }
+        .business-card.rdv { border-left: 3px solid var(--blue); }
+
+        .business-header { padding: 1rem; cursor: pointer; }
+
+        .business-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.5rem;
+        }
+
+        .business-name { font-weight: 500; font-size: 0.9375rem; flex: 1; padding-right: 0.5rem; }
+
+        .business-rating {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.75rem;
+            color: var(--yellow);
+        }
+
+        .business-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .business-category {
+            background: var(--bg-elevated);
+            padding: 0.125rem 0.5rem;
+            border-radius: 4px;
+        }
+
+        .business-status { display: flex; gap: 0.25rem; margin-top: 0.5rem; }
+
+        .status-badge {
+            font-size: 0.625rem;
+            padding: 0.125rem 0.375rem;
+            border-radius: 4px;
+            background: var(--bg-elevated);
+            color: var(--text-muted);
+        }
+
+        .status-badge.active { background: var(--accent-dim); color: var(--accent); }
+        .status-badge.rdv { background: rgba(59, 130, 246, 0.2); color: var(--blue); }
+
+        /* Business Details */
+        .business-details {
+            display: none;
+            padding: 0 1rem 1rem;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .business-card.expanded .business-details { display: block; }
+
+        /* Action Buttons */
+        .action-row {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            padding-top: 1rem;
+        }
+
+        .action-btn {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.375rem;
+            padding: 0.75rem;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: 0.8125rem;
+            cursor: pointer;
+        }
+
+        .action-btn:active { transform: scale(0.98); }
+        .action-btn.primary { background: var(--accent); border-color: var(--accent); color: #000; }
+
+        /* CRM */
+        .crm-section { margin-top: 1rem; }
+        .crm-title { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; }
+
+        .crm-step {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: var(--bg-elevated);
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+        }
+
+        .crm-step.completed { background: var(--accent-dim); }
+
+        .crm-checkbox {
+            width: 24px;
+            height: 24px;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .crm-checkbox.checked { background: var(--accent); border-color: var(--accent); color: #000; }
+        .crm-label { flex: 1; font-size: 0.875rem; }
+        .crm-nested { margin-left: 2rem; padding-left: 0.75rem; border-left: 2px solid var(--border); }
+
+        /* Notes */
+        .notes-section { margin-top: 1rem; }
+
+        .notes-textarea {
+            width: 100%;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.75rem;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.875rem;
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .notes-textarea:focus { outline: none; border-color: var(--accent); }
+
+        .business-address { font-size: 0.8125rem; color: var(--text-secondary); margin-bottom: 0.5rem; }
+        .business-phone { font-size: 0.9375rem; color: var(--accent); font-weight: 500; }
+
+        /* Circuits */
+        .circuits-list { padding: 0.5rem; }
+
+        .circuit-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            margin-bottom: 0.75rem;
+            overflow: hidden;
+        }
+
+        .circuit-header {
+            padding: 1rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .circuit-info { flex: 1; }
+
+        .circuit-name {
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .circuit-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .circuit-stat {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .circuit-badge {
+            background: var(--accent-dim);
+            color: var(--accent);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .circuit-details {
+            display: none;
+            padding: 0 1rem 1rem;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .circuit-card.expanded .circuit-details { display: block; }
+
+        .circuit-stops {
+            padding: 1rem 0;
+        }
+
+        .circuit-stop {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .circuit-stop:last-child { border-bottom: none; }
+
+        .stop-number {
+            width: 24px;
+            height: 24px;
+            background: var(--accent);
+            color: #000;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .stop-info { flex: 1; }
+        .stop-name { font-weight: 500; font-size: 0.875rem; margin-bottom: 0.125rem; }
+        .stop-category { font-size: 0.75rem; color: var(--text-muted); }
+
+        .circuit-action {
+            display: block;
+            width: 100%;
+            padding: 1rem;
+            background: var(--accent);
+            border: none;
+            border-radius: 8px;
+            color: #000;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            text-align: center;
+            text-decoration: none;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+
+        .circuit-action:active { transform: scale(0.98); }
+
+        /* Progress */
+        .progress-ring {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            width: 60px;
+            height: 60px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+
+        .progress-value { font-size: 1rem; font-weight: 600; color: var(--accent); }
+        .progress-label { font-size: 0.5rem; color: var(--text-muted); }
+
+        .filters::-webkit-scrollbar { display: none; }
+        .empty-state { text-align: center; padding: 3rem 1rem; color: var(--text-muted); }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-top">
+            <div class="logo">
+                <div class="logo-icon">🎯</div>
+                <div>
+                    <h1>Prospection</h1>
+                    <p class="subtitle">Saint-Médard-en-Jalles</p>
+                </div>
+            </div>
+        </div>
+        <div class="stats-bar">
+            <div class="stat-item">
+                <div class="stat-value" id="statTotal">100</div>
+                <div class="stat-label">Total</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="statContacted">0</div>
+                <div class="stat-label">Contactés</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="statDecideur">0</div>
+                <div class="stat-label">Décideurs</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="statRdv">0</div>
+                <div class="stat-label">RDV</div>
+            </div>
+        </div>
+    </header>
+
+    <div class="tabs">
+        <button class="tab active" onclick="switchTab('liste')">
+            <span class="tab-icon">📋</span>Liste
+        </button>
+        <button class="tab" onclick="switchTab('circuits')">
+            <span class="tab-icon">🗺️</span>Circuits
+        </button>
+    </div>
+
+    <!-- Tab Liste -->
+    <div id="tab-liste" class="tab-content active">
+        <div class="search-bar">
+            <input type="text" class="search-input" placeholder="🔍 Rechercher une entreprise..." id="searchInput">
+        </div>
+        <div class="filters" id="filters"></div>
+        <div class="business-list" id="businessList"></div>
+    </div>
+
+    <!-- Tab Circuits -->
+    <div id="tab-circuits" class="tab-content">
+        <div class="circuits-list" id="circuitsList"></div>
+    </div>
+
+    <div class="progress-ring" id="progressRing">
+        <div class="progress-value" id="progressValue">0%</div>
+        <div class="progress-label">Avancement</div>
+    </div>
+
+    <script>
+        // Données des entreprises (100)
+        const businesses = [
+            {id:1,name:"[Keik] - Pâtisseries Artisanales",category:"Pâtisserie",address:"74 Rue Alexis Puyo, 33160 Saint-Médard-en-Jalles",phone:"+33 6 30 40 15 66",rating:5,reviews:136,maps:"https://www.google.com/maps/search/?api=1&query=%5BKeik%5D%20-%20P%C3%A2tisseries%20Artisanales%20par%20Maxime%20NEVEU&query_place_id=ChIJ-38q2jbRVA0R0SJReZ02xPQ",zone:"alexis-puyo"},
+            {id:2,name:"Artisan Boulanger Ag",category:"Boulangerie",address:"12 Av. Montesquieu, 33160 Saint-Médard-en-Jalles",phone:"",rating:5,reviews:4,maps:"https://www.google.com/maps/search/?api=1&query=Artisan%20Boulanger%20Ag&query_place_id=ChIJcW6sAQjRVA0Ra2QcP-pN9o4",zone:"montesquieu"},
+            {id:3,name:"Mon petit gâteau",category:"Pâtisserie",address:"45 Rue Jean Dupérier, 33160 Saint-Médard-en-Jalles",phone:"+33 6 70 98 16 92",rating:5,reviews:4,maps:"https://www.google.com/maps/search/?api=1&query=Mon%20petit%20g%C3%A2teau&query_place_id=ChIJ99jcGgfRVA0RSNV8jOq-F2E",zone:"centre"},
+            {id:4,name:"Rotisserie Les Petits Poulets",category:"Restauration",address:"91 Av. Montaigne, 33160 Saint-Médard-en-Jalles",phone:"+33 7 61 70 45 03",rating:5,reviews:45,maps:"https://www.google.com/maps/search/?api=1&query=Rotisserie%20Les%20Petits%20Poulets&query_place_id=ChIJ0af3cuzRVA0Rap40wvQHuPw",zone:"montaigne"},
+            {id:5,name:"Plant&Nous",category:"Commerce",address:"18 Av. Montesquieu, 33160 Saint-Médard-en-Jalles",phone:"+33 6 61 74 36 43",rating:5,reviews:3,maps:"https://www.google.com/maps/search/?api=1&query=Plant%26Nous&query_place_id=ChIJ9y530VHRVA0RMqOQ4BhW3mQ",zone:"montesquieu"},
+            {id:6,name:"Sweet Flowers",category:"Fleuriste",address:"4 All. des Chênes, 33650 Saint-Médard-d'Eyrans",phone:"+33 6 64 76 94 59",rating:5,reviews:22,maps:"https://www.google.com/maps/search/?api=1&query=Sweet%20Flowers&query_place_id=ChIJFViW9lohVQ0R_qc2bdIxo7M",zone:"autres"},
+            {id:7,name:"Lili la main verte",category:"Fleuriste",address:"134 R. Frédéric Sévène, 33400 Talence",phone:"+33 6 11 58 69 91",rating:5,reviews:66,maps:"https://www.google.com/maps/search/?api=1&query=Lili%20la%20main%20verte%20%7C%20Fleuriste%20Talence&query_place_id=ChIJAY7q_dsnVQ0RiWWjDtogXfg",zone:"autres"},
+            {id:8,name:"L'atelier floral de Cécile",category:"Fleuriste",address:"31 Rue des Graves, 33185 Le Haillan",phone:"+33 6 46 57 97 61",rating:5,reviews:13,maps:"https://www.google.com/maps/search/?api=1&query=L'atelier%20floral%20de%20C%C3%A9cile&query_place_id=ChIJpzQrpKfXVA0RPmG_f-8bTFI",zone:"haillan"},
+            {id:9,name:"Rey'passage",category:"Pressing",address:"95 Av. Montaigne, 33160 Saint-Médard-en-Jalles",phone:"+33 5 56 05 21 50",rating:5,reviews:2,maps:"https://www.google.com/maps/search/?api=1&query=Rey'passage&query_place_id=ChIJwVm5OQTRVA0Rw2V6NRPYdFc",zone:"montaigne"},
+            {id:10,name:"Repassage Patricia",category:"Pressing",address:"36 All. de Picot, 33160 Saint-Médard-en-Jalles",phone:"+33 6 28 54 52 71",rating:5,reviews:15,maps:"https://www.google.com/maps/search/?api=1&query=Repassage%20Patricia&query_place_id=ChIJraVbo1LRVA0RtAaqbdF9kTQ",zone:"centre"},
+            {id:11,name:"MIB CLEAN",category:"Pressing",address:"",phone:"+33 6 07 76 02 80",rating:5,reviews:62,maps:"https://www.google.com/maps/search/?api=1&query=MIB%20CLEAN&query_place_id=ChIJ-4g_YsjZVA0RuA8A0UcM-A4",zone:"autres"},
+            {id:12,name:"La petite lanterne",category:"Restauration",address:"78 Rue Alexis Puyo, 33160 Saint-Médard-en-Jalles",phone:"+33 5 56 42 15 10",rating:5,reviews:338,maps:"https://www.google.com/maps/search/?api=1&query=La%20petite%20lanterne&query_place_id=ChIJxXpOSyPRVA0RN0iw5keqliA",zone:"alexis-puyo"},
+            {id:13,name:"Maria LUIS Immobilier",category:"Immobilier",address:"35 Rue Charles Baudelaire, 33160 Saint-Médard-en-Jalles",phone:"+33 6 60 59 31 48",rating:5,reviews:59,maps:"https://www.google.com/maps/search/?api=1&query=Maria%20LUIS%20Immobilier&query_place_id=ChIJe3TX3wTRVA0R10FmGZDCwik",zone:"centre"},
+            {id:14,name:"Cadre D'Envies Immobilier",category:"Immobilier",address:"3 All. Pomerol, 33160 Saint-Aubin-de-Médoc",phone:"+33 6 32 99 27 20",rating:5,reviews:25,maps:"https://www.google.com/maps/search/?api=1&query=Cadre%20D'Envies&query_place_id=ChIJkTbLig_lxCoRhJ728wLQeKA",zone:"saint-aubin"},
+            {id:15,name:"Michael LARANT LF IMMO",category:"Immobilier",address:"32 Rue Maurice Duport, 33160 Saint-Médard-en-Jalles",phone:"+33 7 81 55 73 99",rating:5,reviews:62,maps:"https://www.google.com/maps/search/?api=1&query=Michael%20LARANT%20LF%20IMMO&query_place_id=ChIJI0RewLSw5w4RtBD7_1196yI",zone:"centre"},
+            {id:16,name:"DENISE IRIBARNE IMMOBILIER",category:"Immobilier",address:"32 bis Rue Bernard Palissy, 33160 Saint-Médard-en-Jalles",phone:"+33 6 98 89 68 28",rating:5,reviews:20,maps:"https://www.google.com/maps/search/?api=1&query=DENISE%20IRIBARNE%20IMMOBILIER&query_place_id=ChIJu7JJLKAGX0wRR4kn72gCYro",zone:"centre"},
+            {id:17,name:"Immofinances Bordeaux",category:"Immobilier",address:"62 Rue Jean Baptiste Clément, 33160 Saint-Médard-en-Jalles",phone:"+33 6 18 21 63 69",rating:5,reviews:306,maps:"https://www.google.com/maps/search/?api=1&query=Immofinances%20Bordeaux&query_place_id=ChIJ-cvCisXRVA0R93BcwlOSJOg",zone:"centre"},
+            {id:18,name:"Jérôme Sordel SAFTI",category:"Immobilier",address:"1 Rue Hélène Boucher, 33160 Saint-Médard-en-Jalles",phone:"+33 6 30 59 61 04",rating:5,reviews:49,maps:"https://www.google.com/maps/search/?api=1&query=SAFTI%20immobilier&query_place_id=ChIJg2Vk-wbCkUwRWgqBS6hwsA4",zone:"centre"},
+            {id:19,name:"SARL LEBON PLOMBIER",category:"Plombier",address:"10 Rte de Saint-Aubin, 33160 Saint-Médard-en-Jalles",phone:"",rating:5,reviews:94,maps:"https://www.google.com/maps/search/?api=1&query=LEBON%20PLOMBIER&query_place_id=ChIJXfGfTqbRVA0R-n_36rq_fLU",zone:"saint-aubin"},
+            {id:20,name:"Entreprise Vandais",category:"Plombier",address:"27 Rue Vincent d'Indy, 33160 Saint-Médard-en-Jalles",phone:"+33 6 45 36 14 01",rating:5,reviews:52,maps:"https://www.google.com/maps/search/?api=1&query=Entreprise%20Vandais&query_place_id=ChIJ6cvhK0_PVA0RimC0Riwo9X8",zone:"centre"},
+            {id:21,name:"2SB Plombier Chauffagiste",category:"Plombier",address:"18 Rue Yves du Manoir, 33160 Saint-Médard-en-Jalles",phone:"+33 6 30 27 11 99",rating:5,reviews:98,maps:"https://www.google.com/maps/search/?api=1&query=2SB%20Plombier&query_place_id=ChIJSXYJf0LPVA0R_VX4uVxtSL8",zone:"centre"},
+            {id:22,name:"Cvl Plomberie",category:"Plombier",address:"10 Chem. de Jalès, 33160 Saint-Médard-en-Jalles",phone:"",rating:5,reviews:2,maps:"https://www.google.com/maps/search/?api=1&query=Cvl%20Plomberie&query_place_id=ChIJFwVSpsfRVA0RVJOreGFETr8",zone:"centre"},
+            {id:23,name:"PC Sanchon",category:"Plombier",address:"8C Rue Georges Bizet, 33160 Saint-Médard-en-Jalles",phone:"+33 6 98 13 17 94",rating:5,reviews:16,maps:"https://www.google.com/maps/search/?api=1&query=PC%20Sanchon&query_place_id=ChIJVVXh6CXOVA0R8lReGr7PA-o",zone:"centre"},
+            {id:24,name:"AJP33 Plombier",category:"Plombier",address:"63 Av. Anatole France, 33160 Saint-Médard-en-Jalles",phone:"+33 6 51 05 19 90",rating:5,reviews:10,maps:"https://www.google.com/maps/search/?api=1&query=AJP33&query_place_id=ChIJWT2GEdDRVA0R6GrhFqNtetg",zone:"anatole"},
+            {id:25,name:"Entreprise Frachou Florian",category:"Plombier",address:"25 B Rue Maurice Duport, 33160 Saint-Médard-en-Jalles",phone:"+33 7 61 44 23 23",rating:5,reviews:27,maps:"https://www.google.com/maps/search/?api=1&query=Frachou%20Florian&query_place_id=ChIJxeV27R7RVA0RqHnXvBll9fY",zone:"centre"},
+            {id:26,name:"A.S PLOMBERIE",category:"Plombier",address:"17 Rue des Magnolias, 33650 Saint-Médard-d'Eyrans",phone:"+33 7 83 98 66 02",rating:5,reviews:34,maps:"https://www.google.com/maps/search/?api=1&query=A.S%20PLOMBERIE&query_place_id=ChIJzZUN2hS4p6sRQoV1Jw3MWN0",zone:"autres"},
+            {id:27,name:"BERES CYRIL",category:"Plombier",address:"16 Rue des Sables, 33320 Le Taillan-Médoc",phone:"+33 6 15 89 22 20",rating:5,reviews:2,maps:"https://www.google.com/maps/search/?api=1&query=BERES%20CYRIL&query_place_id=ChIJcUij1HDXVA0RCaO_yJEMfko",zone:"taillan"},
+            {id:28,name:"Fleurs de Passage",category:"Fleuriste",address:"4 Chem. de Marguerite, 33650 Martillac",phone:"+33 6 28 72 27 78",rating:5,reviews:17,maps:"https://www.google.com/maps/search/?api=1&query=Fleurs%20de%20Passage&query_place_id=ChIJbVE4RLYhVQ0R4awDkNZzatM",zone:"autres"},
+            {id:29,name:"l'Art du Canelé",category:"Pâtisserie",address:"49 Av. Descartes, 33160 Saint-Médard-en-Jalles",phone:"+33 5 56 45 18 47",rating:4.9,reviews:28,maps:"https://www.google.com/maps/search/?api=1&query=Art%20du%20Canel%C3%A9&query_place_id=ChIJbUwJMp_RVA0Rb2YFglrv0Fg",zone:"descartes"},
+            {id:30,name:"Un Zeste de Pâtisserie",category:"Pâtisserie",address:"141 Av. Montaigne, 33160 Saint-Médard-en-Jalles",phone:"+33 9 81 77 14 96",rating:4.9,reviews:83,maps:"https://www.google.com/maps/search/?api=1&query=Un%20Zeste%20de%20P%C3%A2tisserie&query_place_id=ChIJK97snw3RVA0ROlNUFXTu45M",zone:"montaigne"},
+            {id:31,name:"Chouette Pâtisserie",category:"Pâtisserie",address:"34 Av. René Descartes, 33160 Saint-Médard-en-Jalles",phone:"+33 7 66 43 12 29",rating:4.9,reviews:14,maps:"https://www.google.com/maps/search/?api=1&query=Chouette%20P%C3%A2tisserie&query_place_id=ChIJAau_u3_RVA0R0VBdrce2zoY",zone:"descartes"},
+            {id:32,name:"Corylus Pâtisserie",category:"Pâtisserie",address:"25 Rue Aurel Chazeau, 33160 Saint-Médard-en-Jalles",phone:"+33 6 58 62 69 59",rating:4.9,reviews:36,maps:"https://www.google.com/maps/search/?api=1&query=Corylus%20P%C3%A2tisserie&query_place_id=ChIJbaHFdI3RVA0RoFWu4emQ7sk",zone:"centre"},
+            {id:33,name:"Rôtisserie La plume des Jalles",category:"Restauration",address:"32 Rue François Mitterrand, 33160 Saint-Médard-en-Jalles",phone:"+33 9 81 85 37 17",rating:4.9,reviews:50,maps:"https://www.google.com/maps/search/?api=1&query=La%20plume%20des%20Jalles&query_place_id=ChIJ4yEcmhrRVA0RTJN4wlCYT9M",zone:"mitterrand"},
+            {id:34,name:"D Koiffeur",category:"Coiffure",address:"114 Av. Montesquieu, 33160 Saint-Médard-en-Jalles",phone:"+33 5 56 05 88 95",rating:4.9,reviews:86,maps:"https://www.google.com/maps/search/?api=1&query=D%20Koiffeur&query_place_id=ChIJN8dh0gfRVA0RpJJAg4U6joc",zone:"montesquieu"},
+            {id:35,name:"l'Atelier de Célia",category:"Coiffure",address:"56 Av. Voltaire, 33160 Saint-Médard-en-Jalles",phone:"+33 5 56 42 58 79",rating:4.9,reviews:73,maps:"https://www.google.com/maps/search/?api=1&query=Atelier%20de%20C%C3%A9lia&query_place_id=ChIJsQoSXCXPVA0RvSvylA3TqJA",zone:"centre"},
+            {id:36,name:"2EN1 INSTITUT HAIR SPA",category:"Coiffure",address:"39 Av. Denis Papin, 33160 Saint-Médard-en-Jalles",phone:"+33 9 87 72 40 40",rating:4.9,reviews:73,maps:"https://www.google.com/maps/search/?api=1&query=2EN1%20INSTITUT&query_place_id=ChIJn9eztPnRVA0RndJXnRfwPVA",zone:"centre"},
+            {id:37,name:"Comme une Fleur",category:"Fleuriste",address:"442 Av. de Verdun, 33700 Mérignac",phone:"+33 5 40 05 84 16",rating:4.9,reviews:86,maps:"https://www.google.com/maps/search/?api=1&query=Comme%20une%20Fleur&query_place_id=ChIJBbyoOGTZVA0RErAS5FWekVI",zone:"merignac"},
+            {id:38,name:"L'atelier Ronsard",category:"Fleuriste",address:"2 Pl. Camille Godard, 33460 Arsac",phone:"+33 7 89 21 15 67",rating:4.9,reviews:38,maps:"https://www.google.com/maps/search/?api=1&query=L'atelier%20Ronsard&query_place_id=ChIJ0dfUUOvTVA0RwOHKuy_j-lQ",zone:"autres"},
+            {id:39,name:"Le Petit Comptoir",category:"Restauration",address:"6 Pl. de l'Hôtel de ville, 33160 Saint-Médard-en-Jalles",phone:"+33 5 56 05 87 65",rating:4.9,reviews:168,maps:"https://www.google.com/maps/search/?api=1&query=Le%20Petit%20Comptoir&query_place_id=ChIJRWezkTDRVA0RXVYObEf1hXw",zone:"mairie"},
+            {id:40,name:"La cuisine de Betty",category:"Restauration",address:"18 Av. Montesquieu, 33160 Saint-Médard-en-Jalles",phone:"+33 5 56 93 04 76",rating:4.9,reviews:32,maps:"https://www.google.com/maps/search/?api=1&query=La%20cuisine%20de%20Betty&query_place_id=ChIJNQfXd8nRVA0RdScXchXDTvo",zone:"montesquieu"},
+            {id:41,name:"Le Bon ManG'Eur",category:"Restauration",address:"8 Rue Serge Noailles, 33160 Saint-Médard-en-Jalles",phone:"+33 7 44 98 99 81",rating:4.9,reviews:307,maps:"https://www.google.com/maps/search/?api=1&query=Le%20Bon%20ManG'Eur&query_place_id=ChIJvSoTmTjRVA0Rq6TydFxtBuQ",zone:"centre"},
+            {id:42,name:"À la Folie Pizzeria",category:"Restauration",address:"110 bis Av. Montaigne, 33160 Saint-Médard-en-Jalles",phone:"+33 5 54 78 78 89",rating:4.9,reviews:410,maps:"https://www.google.com/maps/search/?api=1&query=%C3%80%20la%20Folie%20Pizzeria&query_place_id=ChIJQz59NqvRVA0RgUtVvms6_Wo",zone:"montaigne"},
+            {id:43,name:"Kappuccino",category:"Restauration",address:"33 Rue François Mitterrand, 33160 Saint-Médard-en-Jalles",phone:"+33 6 70 33 84 78",rating:4.9,reviews:226,maps:"https://www.google.com/maps/search/?api=1&query=Kappuccino%2033160&query_place_id=ChIJ7ToQ3lvRVA0RaDP6hNJrIgM",zone:"mitterrand"},
+            {id:44,name:"Human Immobilier",category:"Immobilier",address:"141 Av. Montaigne, 33160 Saint-Médard-en-Jalles",phone:"+33 5 56 05 12 12",rating:4.9,reviews:264,maps:"https://www.google.com/maps/search/?api=1&query=Human%20Immobilier&query_place_id=ChIJgdyQ1wfRVA0R8vYuPzcRLz4",zone:"montaigne"},
+            {id:45,name:"l'Adresse Immobilier",category:"Immobilier",address:"80A Av. Montaigne, 33160 Saint-Médard-en-Jalles",phone:"+33 5 56 14 21 04",rating:4.9,reviews:117,maps:"https://www.google.com/maps/search/?api=1&query=l'Adresse%20Immobilier&query_place_id=ChIJT8lJaS3RVA0R5LJGlLK4bc8",zone:"montaigne"},
+            {id:46,name:"CENTURY 21 Kadima",category:"Immobilier",address:"20-22 Rue François Mitterrand, 33160 Saint-Médard-en-Jalles",phone:"+33 5 56 57 77 77",rating:4.9,reviews:734,maps:"https://www.google.com/maps/search/?api=1&query=CENTURY%2021%20Kadima&query_place_id=ChIJfblzd6jRVA0RQDm4yj5n9Fw",zone:"mitterrand"},
+            {id:47,name:"Orpi Laplace Immobilier",category:"Immobilier",address:"73 Rte de Feydit, 33160 Saint-Médard-en-Jalles",phone:"+33 5 56 05 19 53",rating:4.9,reviews:37,maps:"https://www.google.com/maps/search/?api=1&query=Orpi%20Laplace&query_place_id=ChIJJVMmMonRVA0RTad0gmgMZPI",zone:"feydit"},
+            {id:48,name:"IMMOSOLUTIONS",category:"Immobilier",address:"154 Av. Montaigne, 33160 Saint-Médard-en-Jalles",phone:"+33 5 57 21 57 53",rating:4.9,reviews:147,maps:"https://www.google.com/maps/search/?api=1&query=IMMOSOLUTIONS&query_place_id=ChIJGcBloMLRVA0RoGzTc098iWs",zone:"montaigne"},
+            {id:49,name:"Ashler & Manson",category:"Immobilier",address:"7 Pl. de l'Hôtel de ville, 33160 Saint-Médard-en-Jalles",phone:"+33 6 89 35 88 99",rating:4.9,reviews:39,maps:"https://www.google.com/maps/search/?api=1&query=Ashler%20Manson&query_place_id=ChIJqxL7puzRVA0RJHjFGyfxUCc",zone:"mairie"},
+            {id:50,name:"Boulangerie BL",category:"Boulangerie",address:"24 Av. Descartes, 33160 Saint-Médard-en-Jalles",phone:"+33 5 57 65 27 04",rating:4.8,reviews:137,maps:"https://www.google.com/maps/search/?api=1&query=Boulangerie%20BL&query_place_id=ChIJ6TXYaXTRVA0Rjpb66hY5SfQ",zone:"descartes"},
+            {id:51,name:"Bocadillo",category:"Restauration",address:"85 Av. Anatole France, 33160 Saint-Médard-en-Jalles",phone:"+33 9 82 37 19 89",rating:4.8,reviews:50,maps:"https://www.google.com/maps/search/?api=1&query=Bocadillo&query_place_id=ChIJAQB8ZtDRVA0RKKu6WvYx4tw",zone:"anatole"},
+            {id:52,name:"Au Petit Salon",category:"Coiffure",address:"112 Av. Montaigne, 33160 Saint-Médard-en-Jalles",phone:"+33 5 56 24 08 63",rating:4.8,reviews:85,maps:"https://www.google.com/maps/search/?api=1&query=Au%20Petit%20Salon&query_place_id=ChIJtewLagTRVA0RTtRhcpQASNw",zone:"montaigne"},
+            {id:53,name:"Sofy B. Coiffure",category:"Coiffure",address:"76 Av. Montesquieu, 33160 Saint-Médard-en-Jalles",phone:"+33 5 56 95 71 67",rating:4.8,reviews:105,maps:"https://www.google.com/maps/search/?api=1&query=Sofy%20B.%20Coiffure&query_place_id=ChIJw4TOLKbRVA0R0r0A8MBacF0",zone:"montesquieu"},
+            {id:54,name:"Coiffure H",category:"Coiffure",address:"140 Av. Montaigne, 33160 Saint-Médard-en-Jalles",phone:"+33 5 56 28 38 56",rating:4.8,reviews:60,maps:"https://www.google.com/maps/search/?api=1&query=Coiffure%20H&query_place_id=ChIJcRRgYwbRVA0R9fWJKpfqzTI",zone:"montaigne"},
+            {id:55,name:"Aux Roses des Anges",category:"Fleuriste",address:"109 Av. Montaigne, 33160 Saint-Médard-en-Jalles",phone:"+33 5 56 70 07 18",rating:4.8,reviews:240,maps:"https://www.google.com/maps/search/?api=1&query=Aux%20Roses%20des%20Anges&query_place_id=ChIJbTUWLATRVA0RGYv6IpCrzho",zone:"montaigne"},
+            {id:56,name:"Maëva Flowers",category:"Fleuriste",address:"285 Rte de Pauillac, 33290 Le Pian-Médoc",phone:"+33 5 56 95 25 65",rating:4.8,reviews:116,maps:"https://www.google.com/maps/search/?api=1&query=Ma%C3%ABva%20Flowers&query_place_id=ChIJ3zh-6KXVVA0Rc96RT2FrzLk",zone:"autres"},
+            {id:57,name:"L'atelier BK",category:"Restauration",address:"1 Rte de Feydit, 33160 Saint-Médard-en-Jalles",phone:"+33 9 87 34 79 06",rating:4.8,reviews:116,maps:"https://www.google.com/maps/search/?api=1&query=L'atelier%20BK&query_place_id=ChIJk-2JzavRVA0Rv1HrW6rOomc",zone:"feydit"},
+            {id:58,name:"SWIXIM JALLES IMMO",category:"Immobilier",address:"5 Av. de la Boétie, 33160 Saint-Médard-en-Jalles",phone:"+33 5 56 14 38 35",rating:4.8,reviews:93,maps:"https://www.google.com/maps/search/?api=1&query=SWIXIM%20JALLES&query_place_id=ChIJ8WNHgAjRVA0R40M5zkUIEnE",zone:"boetie"},
+            {id:59,name:"Square Habitat",category:"Immobilier",address:"39 Av. Montesquieu, 33160 Saint-Médard-en-Jalles",phone:"+33 5 56 16 79 90",rating:4.8,reviews:42,maps:"https://www.google.com/maps/search/?api=1&query=Square%20Habitat&query_place_id=ChIJAY80-6fRVA0RvbrXQRPY0vw",zone:"montesquieu"},
+            {id:60,name:"Tranquillimmo",category:"Immobilier",address:"51 Av. Anatole France, 33160 Saint-Médard-en-Jalles",phone:"+33 6 41 61 62 08",rating:4.8,reviews:39,maps:"https://www.google.com/maps/search/?api=1&query=Tranquillimmo&query_place_id=ChIJLyi_M7_RVA0Roi0gf4MWL4Q",zone:"anatole"},
+            {id:61,name:"Agence Pichet",category:"Immobilier",address:"162 Av. Montaigne, 33160 Saint-Médard-en-Jalles",phone:"+33 5 56 35 65 75",rating:4.8,reviews:185,maps:"https://www.google.com/maps/search/?api=1&query=Agence%20Pichet&query_place_id=ChIJiTtvNAbRVA0RQhkD61IKPB4",zone:"montaigne"},
+            {id:62,name:"Cadre D'Envies St-Aubin",category:"Immobilier",address:"16 All. Van Gogh, 33160 Saint-Aubin-de-Médoc",phone:"+33 6 47 02 30 72",rating:4.8,reviews:77,maps:"https://www.google.com/maps/search/?api=1&query=Cadre%20D'Envies&query_place_id=ChIJQVdqeUDRVA0RBbk0uZHAWvI",zone:"saint-aubin"},
+            {id:63,name:"EGB Sud-Ouest",category:"Plombier",address:"8 Rue René Laennec, 33160 Saint-Médard-en-Jalles",phone:"+33 6 03 26 90 03",rating:4.8,reviews:24,maps:"https://www.google.com/maps/search/?api=1&query=EGB%20Sud-Ouest&query_place_id=ChIJM7p7oZTRVA0R-6TYVmOCTZc",zone:"centre"},
+            {id:64,name:"IBR Plomberie",category:"Plombier",address:"15 Rés Hippodrome, 33320 Eysines",phone:"+33 6 02 16 74 00",rating:4.8,reviews:117,maps:"https://www.google.com/maps/search/?api=1&query=IBR%20Plomberie&query_place_id=ChIJ5Z3f0vzXVA0RDXlOCp_j6Hw",zone:"eysines"},
+            {id:65,name:"Bresse Pressing",category:"Pressing",address:"85 Rte de Chalon, 71270 Pierre-de-Bresse",phone:"+33 3 85 72 82 93",rating:4.8,reviews:9,maps:"https://www.google.com/maps/search/?api=1&query=Bresse%20Pressing&query_place_id=ChIJwaauxZPP8kcRRshLa_ZGm3A",zone:"autres"},
+            {id:66,name:"PADOCA Boulangerie Bio",category:"Boulangerie",address:"67 Av. de la Libération, 33320 Eysines",phone:"+33 5 56 24 25 16",rating:4.7,reviews:193,maps:"https://www.google.com/maps/search/?api=1&query=PADOCA&query_place_id=ChIJbwG7CAvXVA0RoMdc6z4ZLR0",zone:"eysines"},
+            {id:67,name:"Inspiration Coiffure",category:"Coiffure",address:"2 Av. Beethoven, 33160 Saint-Médard-en-Jalles",phone:"+33 5 56 15 64 16",rating:4.7,reviews:111,maps:"https://www.google.com/maps/search/?api=1&query=Inspiration%20Coiffure&query_place_id=ChIJQaW6IdzRVA0RqIMiVfslHAE",zone:"centre"},
+            {id:68,name:"Rey's Barbershop",category:"Coiffure",address:"16 Av. de la Boétie, 33160 Saint-Médard-en-Jalles",phone:"+33 5 56 05 67 88",rating:4.7,reviews:154,maps:"https://www.google.com/maps/search/?api=1&query=Rey's%20Barbershop&query_place_id=ChIJsWnvfQjRVA0RqJiRzadvHfQ",zone:"boetie"},
+            {id:69,name:"Le 411",category:"Coiffure",address:"141 Av. Montaigne, 33160 Saint-Médard-en-Jalles",phone:"+33 5 57 21 34 24",rating:4.7,reviews:82,maps:"https://www.google.com/maps/search/?api=1&query=Le%20411&query_place_id=ChIJSSkG1QfRVA0R5X9uWQHfHg0",zone:"montaigne"},
+            {id:70,name:"Au Long Court",category:"Coiffure",address:"113 Av. du Haillan, 33160 Saint-Médard-en-Jalles",phone:"+33 5 56 80 63 77",rating:4.7,reviews:127,maps:"https://www.google.com/maps/search/?api=1&query=Au%20Long%20Court&query_place_id=ChIJRxBWUO7QVA0Rg8Q7FH29Su4",zone:"haillan"},
+            {id:71,name:"Anopoulos Patricia",category:"Coiffure",address:"89 Av. Anatole France, 33160 Saint-Médard-en-Jalles",phone:"+33 6 84 12 95 80",rating:4.7,reviews:54,maps:"https://www.google.com/maps/search/?api=1&query=Anopoulos%20Patricia&query_place_id=ChIJ3U1iitDRVA0RloQD6AKyzj8",zone:"anatole"},
+            {id:72,name:"LE PRESSING",category:"Pressing",address:"609 Av. de Bordeaux, 33127 Saint-Jean-d'Illac",phone:"+33 5 56 88 84 95",rating:4.7,reviews:32,maps:"https://www.google.com/maps/search/?api=1&query=LE%20PRESSING&query_place_id=ChIJOzHFRB3FVA0RSsWJeDuHRF4",zone:"autres"},
+            {id:73,name:"Pressing Vite Propre",category:"Pressing",address:"180 Cr de la Marne, 33800 Bordeaux",phone:"+33 5 56 92 70 53",rating:4.7,reviews:96,maps:"https://www.google.com/maps/search/?api=1&query=Vite%20Propre&query_place_id=ChIJKxe_TEomVQ0RSPk9CMui0zc",zone:"bordeaux"},
+            {id:74,name:"Côté Ouest Restaurant",category:"Restauration",address:"34 Av. Descartes, 33160 Saint-Médard-en-Jalles",phone:"+33 5 56 93 25 93",rating:4.7,reviews:148,maps:"https://www.google.com/maps/search/?api=1&query=C%C3%B4t%C3%A9%20Ouest&query_place_id=ChIJUxe1md_QVA0RJCwoaTuJAfY",zone:"descartes"},
+            {id:75,name:"Green Shack",category:"Restauration",address:"2 Av. de la Boétie, 33160 Saint-Médard-en-Jalles",phone:"+33 5 54 07 31 30",rating:4.7,reviews:1850,maps:"https://www.google.com/maps/search/?api=1&query=Green%20Shack&query_place_id=ChIJb39-RqrRVA0R9DhoOv-QNDA",zone:"boetie"},
+            {id:76,name:"Santosha Cantine",category:"Restauration",address:"92 Av. Montesquieu, 33160 Saint-Médard-en-Jalles",phone:"+33 5 56 28 85 66",rating:4.7,reviews:741,maps:"https://www.google.com/maps/search/?api=1&query=Santosha&query_place_id=ChIJJQnVFcDRVA0RRnqKZ9mcuv4",zone:"montesquieu"},
+            {id:77,name:"Brasserie Garona",category:"Restauration",address:"17 Rue de Belfort, 33160 Saint-Médard-en-Jalles",phone:"+33 6 70 71 92 45",rating:4.7,reviews:125,maps:"https://www.google.com/maps/search/?api=1&query=Brasserie%20Garona&query_place_id=ChIJmYVxMALPVA0R9dQ6FEMiJZo",zone:"centre"},
+            {id:78,name:"Erkan kebab",category:"Restauration",address:"3 Av. René Descartes, 33160 Saint-Médard-en-Jalles",phone:"+33 7 49 46 64 19",rating:4.7,reviews:167,maps:"https://www.google.com/maps/search/?api=1&query=Erkan%20kebab&query_place_id=ChIJ221et0HRVA0RaByJDNDJl7g",zone:"descartes"},
+            {id:79,name:"Le Café Saint-Aubin",category:"Restauration",address:"11 Rte de Saint-Médard, 33160 Saint-Aubin-de-Médoc",phone:"+33 9 81 01 29 18",rating:4.7,reviews:268,maps:"https://www.google.com/maps/search/?api=1&query=Caf%C3%A9%20Saint-Aubin&query_place_id=ChIJ07sM62bRVA0RGu96K5XzHNA",zone:"saint-aubin"},
+            {id:80,name:"Laurent Bechemin",category:"Plombier",address:"26 Rue Sieyès, 33160 Saint-Médard-en-Jalles",phone:"+33 6 31 88 79 39",rating:4.7,reviews:3,maps:"https://www.google.com/maps/search/?api=1&query=Laurent%20Bechemin&query_place_id=ChIJUbMlemXQVA0RA9YmLAX_29Q",zone:"centre"},
+            {id:81,name:"FEUILLERAT SARL",category:"Plombier",address:"123 Rue Pierre Ramond, 33160 Saint-Médard-en-Jalles",phone:"+33 5 56 70 17 70",rating:4.7,reviews:9,maps:"https://www.google.com/maps/search/?api=1&query=FEUILLERAT&query_place_id=ChIJVfINCBLRVA0Rb267-eBAxQE",zone:"centre"},
+            {id:82,name:"Fabrice PE sarl",category:"Plombier",address:"",phone:"+33 6 26 97 18 63",rating:4.7,reviews:25,maps:"https://www.google.com/maps/search/?api=1&query=Fabrice%20PE&query_place_id=ChIJMZgbrJCiSksRCVOF_fUfNUE",zone:"autres"},
+            {id:83,name:"Aquitaine Plomberie",category:"Plombier",address:"",phone:"+33 7 62 62 33 32",rating:4.7,reviews:15,maps:"https://www.google.com/maps/search/?api=1&query=Aquitaine%20Plomberie&query_place_id=ChIJ0c0E4iDSVA0RYg401lt1r8Y",zone:"autres"},
+            {id:84,name:"Chauffe & Vous",category:"Plombier",address:"2 Rue de Bussaguet, 33320 Le Taillan-Médoc",phone:"+33 5 35 54 18 33",rating:4.7,reviews:148,maps:"https://www.google.com/maps/search/?api=1&query=Chauffe%20Vous&query_place_id=ChIJ-3DOusnWVA0Rj4GFcljZDIg",zone:"taillan"},
+            {id:85,name:"Salon 109",category:"Coiffure",address:"109 Av. Montaigne, 33160 Saint-Médard-en-Jalles",phone:"+33 5 56 05 37 54",rating:4.6,reviews:50,maps:"https://www.google.com/maps/search/?api=1&query=Salon%20109&query_place_id=ChIJbTUWLATRVA0RE5m9UVXJ7vI",zone:"montaigne"},
+            {id:86,name:"Saint Algue Coiffeur",category:"Coiffure",address:"34 Av. Descartes, 33160 Saint-Médard-en-Jalles",phone:"+33 5 56 05 28 80",rating:4.6,reviews:393,maps:"https://www.google.com/maps/search/?api=1&query=Saint%20Algue&query_place_id=ChIJW35LSg3RVA0R1zTpkb-19-c",zone:"descartes"},
+            {id:87,name:"au Jardin d'Alice",category:"Commerce",address:"168 Av. Montaigne, 33160 Saint-Médard-en-Jalles",phone:"+33 5 56 99 22 42",rating:4.6,reviews:164,maps:"https://www.google.com/maps/search/?api=1&query=Jardin%20Alice&query_place_id=ChIJc-CSxQfRVA0RtcONDbBeJh8",zone:"montaigne"},
+            {id:88,name:"Cristalys",category:"Fleuriste",address:"156 Av. Pasteur, 33185 Le Haillan",phone:"+33 5 56 55 95 92",rating:4.6,reviews:76,maps:"https://www.google.com/maps/search/?api=1&query=Cristalys&query_place_id=ChIJj_EDu8zQVA0Rw4F3imv-0B8",zone:"haillan"},
+            {id:89,name:"Expressing",category:"Pressing",address:"Av. des Frères Robinson, 33700 Mérignac",phone:"+33 5 56 34 34 02",rating:4.6,reviews:55,maps:"https://www.google.com/maps/search/?api=1&query=Expressing&query_place_id=ChIJu0WA3t_ZVA0RyL8BQRlzoPA",zone:"merignac"},
+            {id:90,name:"Pressing de la Barriere",category:"Pressing",address:"369 Rue de Bègles, 33800 Bordeaux",phone:"+33 9 51 70 44 03",rating:4.6,reviews:52,maps:"https://www.google.com/maps/search/?api=1&query=Pressing%20Barriere&query_place_id=ChIJAYrAH6snVQ0Rk0t5kaM3BzE",zone:"bordeaux"},
+            {id:91,name:"La ferme du Petit Argelas",category:"Restauration",address:"15 Pl. de la Liberté, 33160 Saint-Médard-en-Jalles",phone:"+33 6 13 19 67 35",rating:4.6,reviews:371,maps:"https://www.google.com/maps/search/?api=1&query=Petit%20Argelas&query_place_id=ChIJO6xA2pDXVA0Rz8DDMxeL27U",zone:"centre"},
+            {id:92,name:"Aux 2 pompes",category:"Restauration",address:"87 Av. Blaise Pascal, 33160 Saint-Médard-en-Jalles",phone:"+33 5 56 99 21 06",rating:4.6,reviews:164,maps:"https://www.google.com/maps/search/?api=1&query=Aux%202%20pompes&query_place_id=ChIJ02HQu0fOVA0RSN7CVcAmkG8",zone:"centre"},
+            {id:93,name:"Cabinet Bedin",category:"Immobilier",address:"141 Av. Montaigne, 33160 Saint-Médard-en-Jalles",phone:"+33 5 56 95 79 62",rating:4.6,reviews:79,maps:"https://www.google.com/maps/search/?api=1&query=Cabinet%20Bedin&query_place_id=ChIJgdyQ1wfRVA0RyuEPJpVClsM",zone:"montaigne"},
+            {id:94,name:"UNE DEMEURE POUR TOIT",category:"Immobilier",address:"14 Av. Montaigne, 33160 Saint-Médard-en-Jalles",phone:"+33 5 56 42 40 40",rating:4.6,reviews:48,maps:"https://www.google.com/maps/search/?api=1&query=DEMEURE%20POUR%20TOIT&query_place_id=ChIJ19UIeR7RVA0RytK6K14Ostw",zone:"montaigne"},
+            {id:95,name:"abcc33",category:"Plombier",address:"7 Av. Pierre Girard, 33127 Martignas-sur-Jalle",phone:"+33 6 19 25 81 83",rating:4.6,reviews:15,maps:"https://www.google.com/maps/search/?api=1&query=abcc33&query_place_id=ChIJsfnQBnHFVA0RO4vnqAzSfek",zone:"autres"},
+            {id:96,name:"PRESSING BERSOL",category:"Pressing",address:"1T Av. Gustave Eiffel, 33600 Pessac",phone:"+33 7 84 85 91 47",rating:4.6,reviews:50,maps:"https://www.google.com/maps/search/?api=1&query=BERSOL&query_place_id=ChIJoUSu7XHZVA0RsS4HEh4VMj8",zone:"autres"},
+            {id:97,name:"Le Grenier à Pain",category:"Boulangerie",address:"6 Pl. de l'Église, 33160 Saint-Aubin-de-Médoc",phone:"+33 5 57 93 06 09",rating:4.5,reviews:271,maps:"https://www.google.com/maps/search/?api=1&query=Grenier%20Pain&query_place_id=ChIJKcLrkJrRVA0RozQ55a9ioZA",zone:"saint-aubin"},
+            {id:98,name:"Coeur de Fleurs",category:"Fleuriste",address:"108 Av. Montaigne, 33160 Saint-Médard-en-Jalles",phone:"+33 5 56 15 57 89",rating:4.5,reviews:262,maps:"https://www.google.com/maps/search/?api=1&query=Coeur%20de%20Fleurs&query_place_id=ChIJCakaQgTRVA0RtWPzLc_QFJA",zone:"montaigne"},
+            {id:99,name:"Au Jardin d'Hastignan",category:"Fleuriste",address:"2A Rue Jules Delaube, 33160 Saint-Médard-en-Jalles",phone:"+33 5 56 95 06 43",rating:4.5,reviews:24,maps:"https://www.google.com/maps/search/?api=1&query=Jardin%20Hastignan&query_place_id=ChIJEXO7JNvRVA0RAxUI-gf48VY",zone:"centre"},
+            {id:100,name:"Monceau Fleurs",category:"Fleuriste",address:"223 Av. Pasteur, 33185 Le Haillan",phone:"+33 5 56 51 23 18",rating:4.5,reviews:251,maps:"https://www.google.com/maps/search/?api=1&query=Monceau%20Fleurs&query_place_id=ChIJBUaAJtLQVA0R-1aB1tQFiuc",zone:"haillan"}
+        ];
+
+        // Définition des circuits
+        const circuits = [
+            {
+                id: 'montaigne',
+                name: 'Circuit Avenue Montaigne',
+                icon: '🛣️',
+                description: 'L\'axe commercial principal - 17 entreprises',
+                color: '#22c55e',
+                businesses: businesses.filter(b => b.zone === 'montaigne')
+            },
+            {
+                id: 'centre-mitterrand',
+                name: 'Circuit Centre-Ville & Mitterrand',
+                icon: '🏛️',
+                description: 'Mairie, Rue Mitterrand et environs',
+                color: '#3b82f6',
+                businesses: businesses.filter(b => ['mitterrand', 'mairie', 'centre'].includes(b.zone))
+            },
+            {
+                id: 'montesquieu',
+                name: 'Circuit Montesquieu',
+                icon: '🌳',
+                description: 'Avenue Montesquieu et alentours',
+                color: '#a855f7',
+                businesses: businesses.filter(b => b.zone === 'montesquieu')
+            },
+            {
+                id: 'descartes',
+                name: 'Circuit Descartes & Zone Leclerc',
+                icon: '🛒',
+                description: 'Zone commerciale Descartes',
+                color: '#f97316',
+                businesses: businesses.filter(b => b.zone === 'descartes')
+            },
+            {
+                id: 'boetie-anatole',
+                name: 'Circuit Boétie & Anatole France',
+                icon: '🏘️',
+                description: 'Secteur résidentiel ouest',
+                color: '#ec4899',
+                businesses: businesses.filter(b => ['boetie', 'anatole', 'feydit'].includes(b.zone))
+            },
+            {
+                id: 'saint-aubin',
+                name: 'Circuit Saint-Aubin-de-Médoc',
+                icon: '🌲',
+                description: 'Commune voisine nord',
+                color: '#eab308',
+                businesses: businesses.filter(b => b.zone === 'saint-aubin')
+            },
+            {
+                id: 'communes-voisines',
+                name: 'Circuit Communes Voisines',
+                icon: '🚗',
+                description: 'Le Haillan, Eysines, Taillan, Mérignac...',
+                color: '#64748b',
+                businesses: businesses.filter(b => ['haillan', 'eysines', 'taillan', 'merignac', 'bordeaux', 'autres'].includes(b.zone))
+            }
+        ];
+
+        // Catégories
+        const categories = [...new Set(businesses.map(b => b.category))].sort();
+
+        // État CRM
+        let crmState = JSON.parse(localStorage.getItem('prospection-crm') || '{}');
+        let activeFilter = 'all';
+        let searchQuery = '';
+
+        function saveCrmState() {
+            localStorage.setItem('prospection-crm', JSON.stringify(crmState));
+            updateStats();
+        }
+
+        function getCrmState(id) {
+            return crmState[id] || { contacted: false, presentiel: false, decideur: false, rdvDirect: false, rdvPrevu: false, numeroObtenu: false, numeroContacte: false, rdvApresContact: false, notes: '' };
+        }
+
+        function setCrmValue(id, key, value) {
+            if (!crmState[id]) crmState[id] = {};
+            crmState[id][key] = value;
+            saveCrmState();
+            renderBusinesses();
+        }
+
+        // Tabs
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelector(`[onclick="switchTab('${tab}')"]`).classList.add('active');
+            document.getElementById(`tab-${tab}`).classList.add('active');
+        }
+
+        // Filters
+        function renderFilters() {
+            const container = document.getElementById('filters');
+            const counts = {};
+            categories.forEach(c => counts[c] = businesses.filter(b => b.category === c).length);
+            container.innerHTML = `<button class="filter-btn ${activeFilter === 'all' ? 'active' : ''}" onclick="setFilter('all')">Tous<span class="count">${businesses.length}</span></button>` +
+                categories.map(c => `<button class="filter-btn ${activeFilter === c ? 'active' : ''}" onclick="setFilter('${c}')">${c}<span class="count">${counts[c]}</span></button>`).join('');
+        }
+
+        function setFilter(f) { activeFilter = f; renderFilters(); renderBusinesses(); }
+
+        document.getElementById('searchInput').addEventListener('input', (e) => { searchQuery = e.target.value.toLowerCase(); renderBusinesses(); });
+
+        function toggleCard(id) { document.querySelector(`[data-id="${id}"]`).classList.toggle('expanded'); }
+
+        function toggleCircuit(id) { document.querySelector(`[data-circuit="${id}"]`).classList.toggle('expanded'); }
+
+        // Generate Google Maps multi-stop URL
+        function generateMapsUrl(businessList) {
+            if (businessList.length === 0) return '#';
+            const addresses = businessList.filter(b => b.address).map(b => encodeURIComponent(b.address));
+            if (addresses.length === 0) return '#';
+            if (addresses.length === 1) return `https://www.google.com/maps/dir/?api=1&destination=${addresses[0]}`;
+            const origin = addresses[0];
+            const destination = addresses[addresses.length - 1];
+            const waypoints = addresses.slice(1, -1).join('|');
+            return `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}${waypoints ? '&waypoints=' + waypoints : ''}`;
+        }
+
+        // Render Businesses
+        function renderBusinesses() {
+            const container = document.getElementById('businessList');
+            let filtered = businesses;
+            if (activeFilter !== 'all') filtered = filtered.filter(b => b.category === activeFilter);
+            if (searchQuery) filtered = filtered.filter(b => b.name.toLowerCase().includes(searchQuery) || b.address.toLowerCase().includes(searchQuery) || b.category.toLowerCase().includes(searchQuery));
+            if (filtered.length === 0) { container.innerHTML = '<div class="empty-state">Aucune entreprise trouvée</div>'; return; }
+
+            container.innerHTML = filtered.map(b => {
+                const crm = getCrmState(b.id);
+                const hasRdv = crm.rdvDirect || crm.rdvPrevu || crm.rdvApresContact;
+                const cardClass = hasRdv ? 'rdv' : (crm.contacted ? 'contacted' : '');
+                return `
+                    <div class="business-card ${cardClass}" data-id="${b.id}">
+                        <div class="business-header" onclick="toggleCard(${b.id})">
+                            <div class="business-top">
+                                <div class="business-name">${b.name}</div>
+                                <div class="business-rating">⭐ ${b.rating} <span style="color:var(--text-muted)">(${b.reviews})</span></div>
+                            </div>
+                            <div class="business-meta">
+                                <span class="business-category">${b.category}</span>
+                                ${b.phone ? `<span>📞</span>` : ''}
+                            </div>
+                            <div class="business-status">
+                                ${crm.contacted ? '<span class="status-badge active">Contacté</span>' : ''}
+                                ${crm.decideur ? '<span class="status-badge active">Décideur</span>' : ''}
+                                ${hasRdv ? '<span class="status-badge rdv">RDV</span>' : ''}
+                            </div>
+                        </div>
+                        <div class="business-details">
+                            ${b.address ? `<p class="business-address">📍 ${b.address}</p>` : ''}
+                            ${b.phone ? `<p class="business-phone">📞 ${b.phone}</p>` : ''}
+                            <div class="action-row">
+                                <a href="${b.maps}" target="_blank" class="action-btn">📍 Maps</a>
+                                <a href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(b.address)}" target="_blank" class="action-btn primary">🧭 Y aller</a>
+                                ${b.phone ? `<a href="tel:${b.phone}" class="action-btn">📞</a>` : ''}
+                            </div>
+                            <div class="crm-section">
+                                <div class="crm-title">Suivi</div>
+                                <div class="crm-step ${crm.contacted ? 'completed' : ''}">
+                                    <div class="crm-checkbox ${crm.contacted ? 'checked' : ''}" onclick="setCrmValue(${b.id}, 'contacted', ${!crm.contacted})">${crm.contacted ? '✓' : ''}</div>
+                                    <div class="crm-label">Contacté</div>
+                                </div>
+                                ${crm.contacted ? `
+                                    <div class="crm-nested">
+                                        <div class="crm-step ${crm.presentiel ? 'completed' : ''}">
+                                            <div class="crm-checkbox ${crm.presentiel ? 'checked' : ''}" onclick="setCrmValue(${b.id}, 'presentiel', ${!crm.presentiel})">${crm.presentiel ? '✓' : ''}</div>
+                                            <div class="crm-label">Visite présentielle</div>
+                                        </div>
+                                        ${crm.presentiel ? `
+                                            <div class="crm-nested">
+                                                <div class="crm-step ${crm.decideur ? 'completed' : ''}">
+                                                    <div class="crm-checkbox ${crm.decideur ? 'checked' : ''}" onclick="setCrmValue(${b.id}, 'decideur', ${!crm.decideur})">${crm.decideur ? '✓' : ''}</div>
+                                                    <div class="crm-label">Décideur présent</div>
+                                                </div>
+                                                ${crm.decideur ? `
+                                                    <div class="crm-nested">
+                                                        <div class="crm-step ${crm.rdvDirect ? 'completed' : ''}">
+                                                            <div class="crm-checkbox ${crm.rdvDirect ? 'checked' : ''}" onclick="setCrmValue(${b.id}, 'rdvDirect', ${!crm.rdvDirect})">${crm.rdvDirect ? '✓' : ''}</div>
+                                                            <div class="crm-label">RDV fait sur place</div>
+                                                        </div>
+                                                        <div class="crm-step ${crm.rdvPrevu ? 'completed' : ''}">
+                                                            <div class="crm-checkbox ${crm.rdvPrevu ? 'checked' : ''}" onclick="setCrmValue(${b.id}, 'rdvPrevu', ${!crm.rdvPrevu})">${crm.rdvPrevu ? '✓' : ''}</div>
+                                                            <div class="crm-label">RDV programmé</div>
+                                                        </div>
+                                                    </div>
+                                                ` : `
+                                                    <div class="crm-nested">
+                                                        <div class="crm-step ${crm.numeroObtenu ? 'completed' : ''}">
+                                                            <div class="crm-checkbox ${crm.numeroObtenu ? 'checked' : ''}" onclick="setCrmValue(${b.id}, 'numeroObtenu', ${!crm.numeroObtenu})">${crm.numeroObtenu ? '✓' : ''}</div>
+                                                            <div class="crm-label">Numéro obtenu</div>
+                                                        </div>
+                                                        ${crm.numeroObtenu ? `
+                                                            <div class="crm-nested">
+                                                                <div class="crm-step ${crm.numeroContacte ? 'completed' : ''}">
+                                                                    <div class="crm-checkbox ${crm.numeroContacte ? 'checked' : ''}" onclick="setCrmValue(${b.id}, 'numeroContacte', ${!crm.numeroContacte})">${crm.numeroContacte ? '✓' : ''}</div>
+                                                                    <div class="crm-label">Rappelé</div>
+                                                                </div>
+                                                                ${crm.numeroContacte ? `
+                                                                    <div class="crm-nested">
+                                                                        <div class="crm-step ${crm.rdvApresContact ? 'completed' : ''}">
+                                                                            <div class="crm-checkbox ${crm.rdvApresContact ? 'checked' : ''}" onclick="setCrmValue(${b.id}, 'rdvApresContact', ${!crm.rdvApresContact})">${crm.rdvApresContact ? '✓' : ''}</div>
+                                                                            <div class="crm-label">RDV obtenu</div>
+                                                                        </div>
+                                                                    </div>
+                                                                ` : ''}
+                                                            </div>
+                                                        ` : ''}
+                                                    </div>
+                                                `}
+                                            </div>
+                                        ` : ''}
+                                    </div>
+                                ` : ''}
+                            </div>
+                            <div class="notes-section">
+                                <div class="crm-title">Notes</div>
+                                <textarea class="notes-textarea" placeholder="Ajouter des notes..." onchange="setCrmValue(${b.id}, 'notes', this.value)">${crm.notes || ''}</textarea>
+                            </div>
+                        </div>
+                    </div>`;
+            }).join('');
+        }
+
+        // Render Circuits
+        function renderCircuits() {
+            const container = document.getElementById('circuitsList');
+            container.innerHTML = circuits.filter(c => c.businesses.length > 0).map(circuit => {
+                const mapsUrl = generateMapsUrl(circuit.businesses);
+                return `
+                    <div class="circuit-card" data-circuit="${circuit.id}">
+                        <div class="circuit-header" onclick="toggleCircuit('${circuit.id}')">
+                            <div class="circuit-info">
+                                <div class="circuit-name">
+                                    <span>${circuit.icon}</span>
+                                    ${circuit.name}
+                                </div>
+                                <div class="circuit-meta">
+                                    <span class="circuit-stat">🏢 ${circuit.businesses.length} entreprises</span>
+                                </div>
+                            </div>
+                            <div class="circuit-badge">${circuit.businesses.length}</div>
+                        </div>
+                        <div class="circuit-details">
+                            <p style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 1rem;">${circuit.description}</p>
+                            <div class="circuit-stops">
+                                ${circuit.businesses.map((b, i) => `
+                                    <div class="circuit-stop">
+                                        <div class="stop-number" style="background: ${circuit.color}">${i + 1}</div>
+                                        <div class="stop-info">
+                                            <div class="stop-name">${b.name}</div>
+                                            <div class="stop-category">${b.category}${b.phone ? ' • ' + b.phone : ''}</div>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            <a href="${mapsUrl}" target="_blank" class="circuit-action" style="background: ${circuit.color}">
+                                🧭 Lancer l'itinéraire (${circuit.businesses.length} arrêts)
+                            </a>
+                        </div>
+                    </div>`;
+            }).join('');
+        }
+
+        // Stats
+        function updateStats() {
+            let contacted = 0, decideur = 0, rdv = 0;
+            businesses.forEach(b => {
+                const crm = getCrmState(b.id);
+                if (crm.contacted) contacted++;
+                if (crm.decideur) decideur++;
+                if (crm.rdvDirect || crm.rdvPrevu || crm.rdvApresContact) rdv++;
+            });
+            document.getElementById('statContacted').textContent = contacted;
+            document.getElementById('statDecideur').textContent = decideur;
+            document.getElementById('statRdv').textContent = rdv;
+            document.getElementById('progressValue').textContent = Math.round((contacted / businesses.length) * 100) + '%';
+        }
+
+        // Init
+        renderFilters();
+        renderBusinesses();
+        renderCircuits();
+        updateStats();
+    </script>
+</body>
+</html>
